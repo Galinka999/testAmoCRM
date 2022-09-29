@@ -31,4 +31,11 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'amocrm' => [
+        'client_id' => env('CLIENT_ID'),
+        'client_secret' => env('CLIENT_SECRET'),
+        'client_redirect_uri' => env('CLIENT_REDIRECT_URI'),
+        'client_account' => 'galina89ruzhyk.amocrm.ru',
+    ],
+
 ];

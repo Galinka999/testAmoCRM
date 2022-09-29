@@ -19,10 +19,6 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
 
-//        \SocialiteProviders\Manager\SocialiteWasCalled::class => [
-//            // ... other providers
-//            \App\SocialiteProviders\AmoCrm\AmoCrmExtendSocialite::class.'@handle',
-//        ],
     ];
 
     /**

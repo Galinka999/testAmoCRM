@@ -8,13 +8,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('responsible_user_groups', function (Blueprint $table) {
+        Schema::create('accounts', function (Blueprint $table) {
             $table->id();
+            $table->integer('amocrm_id')->unique();
+            $table->string('name');
+            $table->string('subdomain');
             $table->timestamps();
         });
     }
+
     public function down(): void
     {
-        Schema::dropIfExists('responsible_user_groups');
+        Schema::dropIfExists('accounts');
     }
 };

@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Account;
-use App\Models\LeadPipeline;
+use App\Models\ResponsibleUser;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,12 +10,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('lead_statuses', function (Blueprint $table) {
+        Schema::create('contacts', function (Blueprint $table) {
             $table->id();
             $table->integer('amocrm_id')->unique();
             $table->string('name');
-            $table->integer('sort');
-            $table->foreignIdFor(LeadPipeline::class,'pipeline_id');
+            $table->foreignIdFor(ResponsibleUser::class, 'responsible_user_id');
             $table->foreignIdFor(Account::class, 'account_id');
             $table->timestamps();
         });
@@ -23,6 +22,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('lead_statuses');
+        Schema::dropIfExists('contacts');
     }
 };

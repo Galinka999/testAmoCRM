@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class LossReason extends Model
+class Account extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'amocrm_id', 'name', 'sort'
+        'amocrm_id', 'name', 'subdomain'
     ];
+
 }

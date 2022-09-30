@@ -21,21 +21,20 @@ class OAuthController extends Controller
      */
     public function redirect()
     {
-        $state = bin2hex(random_bytes(16));
-        $_SESSION['oauth2state'] = $state;
+        $state = $_COOKIE['laravel_session'] ?: bin2hex(random_bytes(16));
+//        $_SESSION['oauth2state'] = $state;
+        $_COOKIE['laravel_session'] = $state;
 
         if($state) {
             echo $this->provider->getOAuthButton([
-                'title' => 'Установить coединение',
+                'title' => 'Установить интеграцию',
                 'compact' => false,
                 'class_name' => 'className',
                 'color' => 'green',
                 'error_callback' => 'handleOauthError',
                 'state' => $state,
             ]);
-        } elseif (empty($_GET['state']) || empty($_SESSION['oauth2state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
-            unset($_SESSION['oauth2state']);
-            exit('Invalid state');
+            echo "<br><a href='https://e676-90-188-56-101.ngrok.io'> Назад </a>";
         }
     }
 
@@ -60,6 +59,7 @@ class OAuthController extends Controller
         $ownerDetails = $provider->getResourceOwner($accessToken);
 
         dd('Hello, ' . $ownerDetails->getName() . '!' );
+//        return redirect()->route('welcome');
     }
 
 }

@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class ResponsibleUser extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'amocrm_id', 'name', 'email'
+    ];
 }

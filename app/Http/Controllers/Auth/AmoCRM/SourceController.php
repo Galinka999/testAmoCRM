@@ -4,45 +4,45 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth\AmoCRM;
 
+use App\Http\Controllers\Auth\AmoCRM\Traits\AccessTokenTrait;
 use App\Http\Controllers\Controller;
 use App\Models\LeadPipeline;
 use App\Models\Source;
-use App\Models\Token;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use App\Services\AmoCrmService;
 
 class SourceController extends Controller
 {
-    public function getSources(): \Illuminate\Http\RedirectResponse
+    use AccessTokenTrait;
+
+    public function getSources(AmoCrmService $amoCrmService): \Illuminate\Http\RedirectResponse
     {
-        $token = Token::query()->latest()->first();
-        $access_token = $token->access_token;
+        try {
+            $accessToken = $this->getToken();
 
-        $api = HTTP::withToken($access_token)->get('https://galina89ruzhyk.amocrm.ru/api/v4/sources');
-        $data = json_decode((string)$api, true);
+            $apiClient = $amoCrmService->getApiClient()->setAccessToken($accessToken);
 
-        if(is_null($data)) {
-            return back()->with('error', 'К сожалению, выгружать пока нечего.');
-        }
+            $sources = $apiClient->sources()->get()->toArray();
 
-        $sources = $data['_embedded']['sources'];
+            foreach ($sources as $source) {
 
-        foreach ($sources as $source) {
+                $pipeline = LeadPipeline::where('amocrm_id', $source['pipeline_id'])->pluck('id');
+                if($pipeline->isEmpty()) {
+                    return back()->with('error', 'Выгрузите сначала данные по Воронкам');
+                }
+                $pipelineId = $pipeline[0];
 
-            $pipeline = LeadPipeline::where('amocrm_id', $source['pipeline_id'])->pluck('id');
-            if($pipeline->isEmpty()) {
-                return back()->with('error', 'Выгрузите сначала данные по Воронкам');
+                Source::query()->upsert([
+                    'amocrm_id' => $source['id'],
+                    'name' => $source['name'],
+                    'pipeline_id' => $pipelineId,
+                    'default' => $source['default'],
+                    'external_id' =>$source['external_id'],
+                ], ['amocrm_id'], ['name', 'pipeline_id', 'default', 'external_id']);
             }
-            $pipelineId = $pipeline[0];
-
-            Source::query()->updateOrCreate([
-                'amocrm_id' => $source['id'],
-                'name' => $source['name'],
-                'pipeline_id' => $pipelineId,
-                'default' => $source['default'],
-                'external_id' =>$source['external_id'],
-            ]);
+            return back()->with('success', 'Успешно');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-        return back()->with('success', 'Успешно');
+
     }
 }

@@ -4,45 +4,45 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth\AmoCRM;
 
+use App\Http\Controllers\Auth\AmoCRM\Traits\AccessTokenTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Contact;
 use App\Models\ResponsibleUser;
-use App\Models\Token;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use App\Services\AmoCrmService;
 
 class ContactController extends Controller
 {
-    public function getContacts(): \Illuminate\Http\RedirectResponse
+    use AccessTokenTrait;
+
+    public function getContacts(AmoCrmService $amoCrmService): \Illuminate\Http\RedirectResponse
     {
-        $token = Token::query()->latest()->first();
-        $access_token = $token->access_token;
+        try {
+            $accessToken = $this->getToken();
 
-        $api = HTTP::withToken($access_token)->get('https://galina89ruzhyk.amocrm.ru/api/v4/contacts');
-        $data = json_decode((string)$api, true);
+            $apiClient = $amoCrmService->getApiClient()->setAccessToken($accessToken);
 
-        if(is_null($data)) {
-            return back()->with('error', 'К сожалению, выгружать пока нечего.');
-        }
+            $contacts = $apiClient->contacts()->get()->toArray();
 
-        $contacts = $data['_embedded']['contacts'];
+            foreach ($contacts as $contact) {
 
-        foreach ($contacts as $contact) {
+                $account = Account::where('amocrm_id', $contact['account_id'])->pluck('id');
+                if($account->isEmpty()) {
+                    return back()->with('error', 'Выгрузите сначала данные по Аккаунту');
+                }
+                $accountId = $account[0];
 
-            $account = Account::where('amocrm_id', $contact['account_id'])->pluck('id');
-            if($account->isEmpty()) {
-                return back()->with('error', 'Выгрузите сначала данные по Аккаунту');
+                Contact::query()->upsert([
+                    'amocrm_id' => $contact['id'],
+                    'name' => $contact['name'],
+                    'responsible_user_id' => ResponsibleUser::where('amocrm_id', $contact['responsible_user_id'])->pluck('id')[0],
+                    'account_id' => $accountId,
+                ], ['amocrm_id'], ['name', 'responsible_user_id', 'account_id']);
             }
-            $accountId = $account[0];
+            return back()->with('success', 'Успешно');
 
-            Contact::query()->updateOrCreate([
-                'amocrm_id' => $contact['id'],
-                'name' => $contact['name'],
-                'responsible_user_id' => ResponsibleUser::where('amocrm_id', $contact['responsible_user_id'])->pluck('id')[0],
-                'account_id' => $accountId,
-            ]);
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-        return back()->with('success', 'Успешно');
     }
 }

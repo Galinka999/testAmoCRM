@@ -4,31 +4,34 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth\AmoCRM;
 
+use AmoCRM\Models\AccountModel;
+use App\Http\Controllers\Auth\AmoCRM\Traits\AccessTokenTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
-use App\Models\Token;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use App\Services\AmoCrmService;
 
 class AccountController extends Controller
 {
-    public function getAccount(): \Illuminate\Http\RedirectResponse
+    use AccessTokenTrait;
+
+    public function getAccount(AmoCrmService $amoCrmService): \Illuminate\Http\RedirectResponse
     {
-        $token = Token::query()->latest()->first();
-        $access_token = $token->access_token;
+        $accessToken = $this->getToken();
 
-        $api = HTTP::withToken($access_token)->get('https://galina89ruzhyk.amocrm.ru/api/v4/account');
-        $data = json_decode((string)$api, true);
+        $apiClient = $amoCrmService->getApiClient()->setAccessToken($accessToken);
 
-        if(is_null($data)) {
-            return back()->with('error', 'К сожалению, выгружать пока нечего.');
-        }
+        $data = $apiClient->account()->getCurrent(AccountModel::getAvailableWith());
+
+//        if(is_null($data)) {
+//            return back()->with('error', 'К сожалению, выгружать пока нечего.');
+//        }
 
         Account::query()->updateOrCreate([
-            'amocrm_id' => $data['id'],
-            'name' => $data['name'],
-            'subdomain' => $data['subdomain'],
+            'amocrm_id' => $data->id,
+            'name' => $data->name,
+            'subdomain' => $data->subdomain,
         ]);
+
         return back()->with('success', 'Успешно');
     }
 }

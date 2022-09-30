@@ -35,7 +35,7 @@ return [
         'client_id' => env('CLIENT_ID'),
         'client_secret' => env('CLIENT_SECRET'),
         'client_redirect_uri' => env('CLIENT_REDIRECT_URI'),
-        'client_account' => 'galina89ruzhyk.amocrm.ru',
+        'client_account' => env('ACCOUNT_BASE_DOMAIN'),
     ],
 
 ];

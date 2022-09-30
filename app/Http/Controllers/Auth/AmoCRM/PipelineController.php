@@ -4,58 +4,58 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth\AmoCRM;
 
+use App\Http\Controllers\Auth\AmoCRM\Traits\AccessTokenTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\LeadPipeline;
 use App\Models\LeadStatus;
-use App\Models\Token;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use App\Services\AmoCrmService;
 
 class PipelineController extends Controller
 {
-    public function getPipelines(): \Illuminate\Http\RedirectResponse
+    use AccessTokenTrait;
+
+    public function getPipelines(AmoCrmService $amoCrmService): \Illuminate\Http\RedirectResponse
     {
-        $token = Token::query()->latest()->first();
-        $access_token = $token->access_token;
+        try {
+            $accessToken = $this->getToken();
 
-        $api = HTTP::withToken($access_token)->get('https://galina89ruzhyk.amocrm.ru/api/v4/leads/pipelines');
-        $data = json_decode((string)$api, true);
+            $apiClient = $amoCrmService->getApiClient()->setAccessToken($accessToken);
 
-        if(is_null($data)) {
-            return back()->with('error', 'К сожалению, выгружать пока нечего.');
-        }
+            $pipelines = $apiClient->pipelines()->get()->toArray();
 
-        $pipelines = $data['_embedded']['pipelines'];
+            foreach ($pipelines as $pipeline) {
 
-        foreach ($pipelines as $pipeline) {
+                $account = Account::where('amocrm_id', $pipeline['account_id'])->pluck('id');
+                if ($account->isEmpty()) {
+                    return back()->with('error', 'Выгрузите сначала данные по Аккаунту');
+                }
+                $accountId = $account[0];
 
-            $account = Account::where('amocrm_id', $pipeline['account_id'])->pluck('id');
-            if($account->isEmpty()) {
-                return back()->with('error', 'Выгрузите сначала данные по Аккаунту');
+                LeadPipeline::query()->upsert([
+                    'amocrm_id' => $pipeline['id'],
+                    'name' => $pipeline['name'],
+                    'is_main' => $pipeline['is_main'],
+                    'is_archive' => $pipeline['is_archive'],
+                    'account_id' => $accountId,
+                ], ['amocrm_id'], ['name', 'is_main', 'is_archive', 'account_id']);
+
+                $statuses = $pipeline['statuses'];
+                $pipeline_new = LeadPipeline::where('amocrm_id', $pipeline['id'])->first();
+
+                foreach ($statuses as $status) {
+                    LeadStatus::query()->upsert([
+                        'amocrm_id' => $status['id'],
+                        'name' => $status['name'],
+                        'sort' => $status['sort'],
+                        'pipeline_id' => $pipeline_new->id,
+                        'account_id' => $pipeline_new->account_id,
+                    ], ['amocrm_id'], ['name', 'sort', 'pipeline_id', 'account_id']);
+                }
             }
-            $accountId = $account[0];
-
-            $pipeline_new = LeadPipeline::query()->updateOrCreate([
-                'amocrm_id' => $pipeline['id'],
-                'name' => $pipeline['name'],
-                'is_main' => $pipeline['is_main'],
-                'is_archive' => $pipeline['is_archive'],
-                'account_id' => $accountId,
-            ]);
-
-            $statuses = $pipeline['_embedded']['statuses'];
-
-            foreach ($statuses as $status) {
-                LeadStatus::query()->updateOrCreate([
-                    'amocrm_id' => $status['id'],
-                    'name' => $status['name'],
-                    'sort' => $status['sort'],
-                    'pipeline_id' => $pipeline_new->id,
-                    'account_id' => $pipeline_new->account_id,
-                ]);
-            }
+            return back()->with('success', 'Успешно');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-        return back()->with('success', 'Успешно');
     }
 }

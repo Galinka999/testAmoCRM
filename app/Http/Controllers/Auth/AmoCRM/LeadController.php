@@ -4,35 +4,32 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth\AmoCRM;
 
+use App\Http\Controllers\Auth\AmoCRM\Traits\AccessTokenTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
-use App\Models\Company;
-use App\Models\Contact;
 use App\Models\Lead;
 use App\Models\LeadPipeline;
 use App\Models\LeadStatus;
 use App\Models\LossReason;
 use App\Models\ResponsibleUser;
 use App\Models\Source;
-use App\Models\Token;
-use DateTime;
-use Illuminate\Support\Facades\Http;
+use App\Services\AmoCrmService;
 
 class LeadController extends Controller
 {
-    public function getLeads()
+    use AccessTokenTrait;
+
+    public function getLeads(AmoCrmService $amoCrmService)
     {
-        $token = Token::query()->latest()->first();
-        $access_token = $token->access_token;
+        try {
+            $accessToken = $this->getToken();
 
-        $api = HTTP::withToken($access_token)->get('https://galina89ruzhyk.amocrm.ru/api/v4/leads?with=catalog_elements,loss_reason,contacts,source_id,is_price_modified_by_robot');
-        $data = json_decode((string)$api, true);
+            $apiClient = $amoCrmService->getApiClient()->setAccessToken($accessToken);
 
-        if(is_null($data)) {
-            return back()->with('error', 'К сожалению, выгружать пока нечего.');
+            $leads = $apiClient->leads()->get(null, ['catalog_elements','loss_reason','contacts','source_id','is_price_modified_by_robot'])->toArray();
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        $leads = $data['_embedded']['leads'];
 
         foreach ($leads as $lead) {
 
@@ -135,17 +132,16 @@ class LeadController extends Controller
         return back()->with('success', 'Успешно');
     }
 
-    public function getLossReason(array $lead)
+    public function getLossReason($lead)
     {
-        if(array_key_exists(0,  $lead['_embedded']['loss_reason'])) {
-            $lossReason = $lead['_embedded']['loss_reason'][0];
-
-            $lossReasonNew = LossReason::query()->updateOrCreate([
+        if(isset($lead['loss_reason'])) {
+            $lossReason = $lead['loss_reason'];
+            $lossReasonNew = LossReason::query()->upsert([
                 'amocrm_id' => $lossReason['id'],
                 'name' => $lossReason['name'],
                 'sort' => $lossReason['sort'],
-            ]);
-            $lossReasonNewId = $lossReasonNew->id;
+            ], ['amocrm_id'], ['name', 'sort']);
+            $lossReasonNewId = LossReason::where('amocrm_id', $lossReason['id'])->pluck('id')[0];
         } else {
             $lossReasonNewId = null;
         }

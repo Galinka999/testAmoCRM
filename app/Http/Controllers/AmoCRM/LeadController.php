@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Auth\AmoCRM;
+namespace App\Http\Controllers\AmoCRM;
 
-use App\Http\Controllers\Auth\AmoCRM\Traits\AccessTokenTrait;
+use App\Http\Controllers\AmoCRM\Traits\AccessTokenTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Lead;
@@ -19,7 +19,7 @@ class LeadController extends Controller
 {
     use AccessTokenTrait;
 
-    public function getLeads(AmoCrmService $amoCrmService)
+    public function getLeads(AmoCrmService $amoCrmService): \Illuminate\Http\RedirectResponse
     {
         try {
             $accessToken = $this->getToken();
@@ -132,7 +132,7 @@ class LeadController extends Controller
         return back()->with('success', 'Успешно');
     }
 
-    public function getLossReason($lead)
+    public function getLossReason($lead): int
     {
         if(isset($lead['loss_reason'])) {
             $lossReason = $lead['loss_reason'];

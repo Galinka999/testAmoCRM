@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth\AmoCRM\Traits;
+namespace App\Http\Controllers\AmoCRM\Traits;
 
 trait AccessTokenTrait
 {

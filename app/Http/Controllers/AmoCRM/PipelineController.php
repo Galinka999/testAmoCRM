@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Auth\AmoCRM;
+namespace App\Http\Controllers\AmoCRM;
 
-use App\Http\Controllers\Auth\AmoCRM\Traits\AccessTokenTrait;
+use App\Http\Controllers\AmoCRM\Traits\AccessTokenTrait;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\LeadPipeline;

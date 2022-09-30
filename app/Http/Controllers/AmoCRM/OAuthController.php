@@ -2,15 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Controllers\Auth\AmoCRM;
+namespace App\Http\Controllers\AmoCRM;
 
 use AmoCRM\Exceptions\BadTypeException;
 use App\Http\Controllers\Controller;
-use App\Models\Token;
 use App\Services\AmoCrmService;
-use League\OAuth2\Client\Token\AccessToken;
-use League\OAuth2\Client\Token\AccessTokenInterface;
-use OAuthService;
 
 class OAuthController extends Controller
 {
@@ -41,17 +37,13 @@ class OAuthController extends Controller
         }
     }
 
-    public function callback(AmoCrmService $amoCrmService)
+    public function callback()
     {
         try {
             $accessToken = $this->provider->getAccessTokenByCode($_GET['code']);
 
             if (!$accessToken->hasExpired()) {
-//                $token = Token::query()->create([
-//                    'access_token' => $accessToken->getToken(),
-//                    'refresh_token' => $accessToken->getRefreshToken(),
-//                    'provider' => 'amoCRM',
-//                ]);
+
                 $data = [
                     'accessToken' => $accessToken->getToken(),
                     'expires' => $accessToken->getExpires(),
@@ -60,7 +52,7 @@ class OAuthController extends Controller
                 ];
 
                 \Storage::disk('local')->put('access_token.txt', json_encode($data));
-//                    file_put_contents(TOKEN_FILE, json_encode($data));
+
             } else {
                 exit('Invalid access token ' . var_export($accessToken, true));
             }

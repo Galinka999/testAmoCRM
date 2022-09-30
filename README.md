@@ -7,7 +7,7 @@
 ## Install
 - git clone ...
 - cd testAmoCRM
-- create a file .env(настроить подключение к БД)
+- create a file .env(настроить подключение к БД, прописать настройки AmoCRM)
 - php artisan key:gen
 - docker compose build
 - docker compose up -d

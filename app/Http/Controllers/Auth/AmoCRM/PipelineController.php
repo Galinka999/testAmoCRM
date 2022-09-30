@@ -29,13 +29,21 @@ class PipelineController extends Controller
         $pipelines = $data['_embedded']['pipelines'];
 
         foreach ($pipelines as $pipeline) {
+
+            $account = Account::where('amocrm_id', $pipeline['account_id'])->pluck('id');
+            if($account->isEmpty()) {
+                return back()->with('error', 'Выгрузите сначала данные по Аккаунту');
+            }
+            $accountId = $account[0];
+
             $pipeline_new = LeadPipeline::query()->updateOrCreate([
                 'amocrm_id' => $pipeline['id'],
                 'name' => $pipeline['name'],
                 'is_main' => $pipeline['is_main'],
                 'is_archive' => $pipeline['is_archive'],
-                'account_id' => Account::where('amocrm_id', $pipeline['account_id'])->pluck('id')[0],
+                'account_id' => $accountId,
             ]);
+
             $statuses = $pipeline['_embedded']['statuses'];
 
             foreach ($statuses as $status) {

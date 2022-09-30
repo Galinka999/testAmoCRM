@@ -14,8 +14,8 @@ return new class extends Migration
             $table->id();
             $table->integer('amocrm_id')->unique();
             $table->string('name');
-            $table->foreignIdFor(ResponsibleUser::class, 'responsible_user_id');
-            $table->foreignIdFor(Account::class, 'account_id');
+            $table->foreignIdFor(ResponsibleUser::class, 'responsible_user_id')->index();
+            $table->foreignIdFor(Account::class, 'account_id')->index();
             $table->timestamps();
         });
     }

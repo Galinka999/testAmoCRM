@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Auth\AmoCRM;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Company;
+use App\Models\LeadPipeline;
 use App\Models\Token;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -28,11 +29,18 @@ class CompanyController extends Controller
         $companies = $data['_embedded']['companies'];
 
         foreach ($companies as $company) {
+
+            $account = Account::where('amocrm_id', $company['account_id'])->pluck('id');
+            if($account->isEmpty()) {
+                return back()->with('error', 'Выгрузите сначала данные по Аккаунту');
+            }
+            $accountId = $account[0];
+
             Company::query()->updateOrCreate([
                 'amocrm_id' => $company['id'],
                 'name' => $company['name'],
                 'responsible_user_id' => $company['responsible_user_id'],
-                'account_id' => Account::where('amocrm_id', $company['account_id'])->pluck('id')[0],
+                'account_id' =>$accountId,
             ]);
         }
         return back()->with('success', 'Успешно');

@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('leads', function (Blueprint $table) {
             $table->id();
-            $table->integer('amocrm_id')->index()->unique();
+            $table->integer('amocrm_id')->unique()->index();
             $table->string('name');
             $table->integer('price');
             $table->foreignIdFor(ResponsibleUser::class, 'responsible_user_id')->index();

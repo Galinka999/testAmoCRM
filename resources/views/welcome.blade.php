@@ -48,7 +48,7 @@
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <a href="{{ route('redirect') }}">
-                            Авторизиваться в AmoCRM
+                           1. Авторизиваться в AmoCRM
                         </a>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <a href="{{ route('account') }}">
-                            Получить данные аккаунта
+                           2. Получить данные аккаунта
                         </a>
                     </div>
                 </div>
@@ -64,7 +64,7 @@
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <a href="{{ route('users') }}">
-                            Выгрузить пользователей
+                           3. Выгрузить пользователей
                         </a>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <a href="{{ route('contacts') }}">
-                            Выгрузить контакты
+                           4. Выгрузить контакты
                         </a>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <a href="{{ route('companies') }}">
-                            Выгрузить компании
+                           5. Выгрузить компании
                         </a>
                     </div>
                 </div>
@@ -88,7 +88,7 @@
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <a href="{{ route('pipeline') }}">
-                            Выгрузить воронки и статусы
+                           6. Выгрузить воронки и статусы
                         </a>
                     </div>
                 </div>
@@ -96,7 +96,7 @@
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <a href="{{ route('sources') }}">
-                            Выгрузить источники сделок
+                           7. Выгрузить источники сделок
                         </a>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
                     <div class="grid grid-cols-1 md:grid-cols-2">
                         <a href="{{ route('leads') }}">
-                            Выгрузить сделки
+                           8. Выгрузить сделки
                         </a>
                     </div>
                 </div>

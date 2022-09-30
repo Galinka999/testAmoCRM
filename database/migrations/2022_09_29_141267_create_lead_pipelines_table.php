@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('name');
             $table->boolean('is_main');
             $table->boolean('is_archive');
-            $table->foreignIdFor(Account::class, 'account_id');
+            $table->foreignIdFor(Account::class, 'account_id')->index();
             $table->timestamps();
         });
     }

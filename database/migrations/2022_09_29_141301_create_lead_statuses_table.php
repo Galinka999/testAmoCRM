@@ -15,8 +15,8 @@ return new class extends Migration
             $table->integer('amocrm_id')->unique();
             $table->string('name');
             $table->integer('sort');
-            $table->foreignIdFor(LeadPipeline::class,'pipeline_id');
-            $table->foreignIdFor(Account::class, 'account_id');
+            $table->foreignIdFor(LeadPipeline::class,'pipeline_id')->index();
+            $table->foreignIdFor(Account::class, 'account_id')->index();
             $table->timestamps();
         });
     }

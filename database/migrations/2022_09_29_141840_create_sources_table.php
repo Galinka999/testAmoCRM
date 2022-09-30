@@ -13,7 +13,7 @@ return new class extends Migration
             $table->id();
             $table->integer('amocrm_id')->unique();
             $table->string('name');
-            $table->foreignIdFor(LeadPipeline::class, 'pipeline_id');
+            $table->foreignIdFor(LeadPipeline::class, 'pipeline_id')->index();
             $table->boolean('default');
             $table->string('external_id');
             $table->timestamps();

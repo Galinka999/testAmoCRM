@@ -29,14 +29,16 @@ class SourceController extends Controller
 
         foreach ($sources as $source) {
 
-            if(!LeadPipeline::where('amocrm_id', $source['pipeline_id'])->pluck('id')) {
-                return back()->with('error', "Выгрузите сначала данные по Воронкам");
+            $pipeline = LeadPipeline::where('amocrm_id', $source['pipeline_id'])->pluck('id');
+            if($pipeline->isEmpty()) {
+                return back()->with('error', 'Выгрузите сначала данные по Воронкам');
             }
+            $pipelineId = $pipeline[0];
 
             Source::query()->updateOrCreate([
                 'amocrm_id' => $source['id'],
                 'name' => $source['name'],
-                'pipeline_id' => LeadPipeline::where('amocrm_id', $source['pipeline_id'])->pluck('id')[0],
+                'pipeline_id' => $pipelineId,
                 'default' => $source['default'],
                 'external_id' =>$source['external_id'],
             ]);

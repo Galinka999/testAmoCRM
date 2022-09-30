@@ -29,11 +29,18 @@ class ContactController extends Controller
         $contacts = $data['_embedded']['contacts'];
 
         foreach ($contacts as $contact) {
+
+            $account = Account::where('amocrm_id', $contact['account_id'])->pluck('id');
+            if($account->isEmpty()) {
+                return back()->with('error', 'Выгрузите сначала данные по Аккаунту');
+            }
+            $accountId = $account[0];
+
             Contact::query()->updateOrCreate([
                 'amocrm_id' => $contact['id'],
                 'name' => $contact['name'],
                 'responsible_user_id' => ResponsibleUser::where('amocrm_id', $contact['responsible_user_id'])->pluck('id')[0],
-                'account_id' => Account::where('amocrm_id', $contact['account_id'])->pluck('id')[0],
+                'account_id' => $accountId,
             ]);
         }
         return back()->with('success', 'Успешно');

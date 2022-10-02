@@ -132,7 +132,7 @@ class LeadController extends Controller
         return back()->with('success', 'Успешно');
     }
 
-    public function getLossReason($lead): int
+    public function getLossReason($lead): int|null
     {
         if(isset($lead['loss_reason'])) {
             $lossReason = $lead['loss_reason'];
